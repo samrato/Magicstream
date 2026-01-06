@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	controller "github.com/samrato/magicstream/controllers"
 )
 func main(){
     router:=gin.Default()
@@ -11,6 +12,8 @@ func main(){
 	router.GET("/users",func(c *gin.Context) {
 		c.String(200,"Hello magic stream")
 	})
+   router.GET("/movie",controller.GetMovie())
+
 	//creating the server in a particular port 
 
 	if err:=router.Run(":8080");err!= nil{
