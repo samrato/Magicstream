@@ -20,7 +20,7 @@ func Connect() *mongo.Client {
 	}
 	mongoURI := os.Getenv("MONGODB_URI")
 	if mongoURI == "" {
-		log.Println("MONGODB_URI not set its blank kindly reset that well")
+		log.Fatal("MONGODB_URI not set its blank kindly reset that well")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -34,7 +34,7 @@ func Connect() *mongo.Client {
 	if err := client.Ping(ctx, nil); err != nil {
 		log.Fatal("Failed to ping MongoDB:", err)
 	}
-
+    fmt.Println("its working mongo db is connectd well")
 	return client
 }
 

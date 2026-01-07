@@ -5,22 +5,30 @@
 
 **Backend API for a Movie Streaming Platform** built with **Go (gin-gonic) and MongoDB**.
 
-This backend provides RESTful API endpoints for user management, movie handling, genres, and AI-powered recommendations. It’s designed for scalability, security, and easy integration with any frontend.
+This backend provides RESTful API endpoints for **user management, movie handling, genres, and AI-powered recommendations**. Designed for scalability, security, and easy integration with any frontend.
 
 ---
 
 ## Table of Contents
 
 * [About](#about)
+
 * [Features](#features)
+
 * [Tech Stack](#tech-stack)
+
 * [Installation](#installation)
+
 * [Environment Variables](#environment-variables)
+
 * [API Documentation](#api-documentation)
 
   * [Unprotected Routes](#unprotected-routes)
-  * [Protected Routes](#protected-routes)
+  * [Authenticated Routes](#authenticated-routes)
+  * [Admin Routes](#admin-routes)
+
 * [Folder Structure](#folder-structure)
+
 * [License](#license)
 
 ---
@@ -29,7 +37,7 @@ This backend provides RESTful API endpoints for user management, movie handling,
 
 MagicStream backend simulates a modern movie streaming service API.
 
-* Handles **user registration, login, authentication**
+* Handles **user registration, login, and authentication**
 * CRUD operations for **movies** and **genres**
 * Admin review updates and **AI-powered recommendations**
 * Secure JWT-based authentication and refresh tokens
@@ -50,11 +58,11 @@ MagicStream backend simulates a modern movie streaming service API.
 
 ## Tech Stack
 
-| Layer               | Technology                      |
-| ------------------- | ------------------------------- |
-| Backend / API       | Go / gin-gonic                  |
-| Database            | MongoDB                         |
-| AI / Recommendation | OpenAI / LangChainGo (optional) |
+| Layer               | Technology        |
+| ------------------- | ----------------- |
+| Backend / API       | Go / gin-gonic    |
+| Database            | MongoDB           |
+| AI / Recommendation | OpenAI (optional) |
 
 ---
 
@@ -78,6 +86,7 @@ go mod tidy
 ```env
 MONGO_URI=<your-mongodb-uri>
 JWT_SECRET=<your-secret-key>
+JWT_REFRESH_SECRET=<your-refresh-secret>
 ALLOWED_ORIGINS=http://localhost:5173
 ```
 
@@ -95,27 +104,38 @@ Server will start at: `http://localhost:8080`
 
 ### Unprotected Routes (No Auth Required)
 
-| Method | Endpoint    | Description                    |
-| ------ | ----------- | ------------------------------ |
-| POST   | `/register` | Register a new user            |
-| POST   | `/login`    | Login user and get JWT token   |
-| POST   | `/logout`   | Logout user (invalidate token) |
-| POST   | `/refresh`  | Refresh JWT token              |
-| GET    | `/movies`   | Fetch all movies               |
-| GET    | `/genres`   | Fetch all genres               |
+| Method | Endpoint               | Description                       |
+| ------ | ---------------------- | --------------------------------- |
+| POST   | `/users/register`      | Register a new user               |
+| POST   | `/users/login`         | Login user and get JWT tokens     |
+| POST   | `/users/refresh-token` | Refresh JWT token                 |
+| GET    | `/movies`              | Fetch all movies                  |
+| GET    | `/movies/:imdb_id`     | Fetch a specific movie by IMDb ID |
+| GET    | `/movies/recommended`  | Fetch recommended movies          |
+| GET    | `/genres`              | Fetch all genres                  |
 
 ---
 
-### Protected Routes (JWT Auth Required)
+### Authenticated Routes (JWT Required)
 
-> Middleware: `AuthMiddleWare()`
+> Middleware: `AuthMiddleware()`
 
-| Method | Endpoint                 | Description                         |
-| ------ | ------------------------ | ----------------------------------- |
-| GET    | `/movie/:imdb_id`        | Fetch a specific movie by IMDb ID   |
-| POST   | `/addmovie`              | Add a new movie (Admin only)        |
-| PATCH  | `/updatereview/:imdb_id` | Update admin review for a movie     |
-| GET    | `/recommendedmovies`     | Fetch AI-powered recommended movies |
+| Method | Endpoint                  | Description                           |
+| ------ | ------------------------- | ------------------------------------- |
+| GET    | `/users/profile`          | Get logged-in user profile            |
+| PUT    | `/users/favourite-genres` | Update user's favourite genres        |
+| POST   | `/users/logout`           | Logout user (invalidate token)        |
+| POST   | `/movies`                 | Add a new movie (authenticated users) |
+
+---
+
+### Admin Routes (JWT + Admin Role)
+
+> Middleware: `AuthMiddleware() + AdminOnly()`
+
+| Method | Endpoint                        | Description                              |
+| ------ | ------------------------------- | ---------------------------------------- |
+| PUT    | `/admin/movies/:imdb_id/review` | Update admin review and ranking of movie |
 
 ---
 
@@ -128,7 +148,7 @@ MagicStreamServer/
 ├── middleware/      # JWT auth middleware
 ├── models/          # Database schemas (User, Movie, Genre)
 ├── routes/          # Route definitions
-├── utils/           # Helper functions (hashing, JWT, etc.)
+├── utils/           # Helper functions (JWT, hashing, env)
 └── main.go          # Entry point of the application
 ```
 
@@ -136,11 +156,12 @@ MagicStreamServer/
 
 ## Environment Variables
 
-| Variable          | Description                                  |
-| ----------------- | -------------------------------------------- |
-| `MONGO_URI`       | MongoDB connection string                    |
-| `JWT_SECRET`      | Secret key for JWT signing                   |
-| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins |
+| Variable             | Description                                  |
+| -------------------- | -------------------------------------------- |
+| `MONGO_URI`          | MongoDB connection string                    |
+| `JWT_SECRET`         | Secret key for JWT signing                   |
+| `JWT_REFRESH_SECRET` | Secret key for refresh token                 |
+| `ALLOWED_ORIGINS`    | Comma-separated list of allowed CORS origins |
 
 ---
 
@@ -149,7 +170,7 @@ MagicStreamServer/
 **Register a User:**
 
 ```bash
-POST /register
+POST /users/register
 Content-Type: application/json
 
 {
@@ -164,7 +185,7 @@ Content-Type: application/json
 **Login:**
 
 ```bash
-POST /login
+POST /users/login
 Content-Type: application/json
 
 {
@@ -173,7 +194,7 @@ Content-Type: application/json
 }
 ```
 
-Response includes:
+**Response:**
 
 ```json
 {
@@ -196,6 +217,4 @@ MIT License © 2026 MagicStream
 
 ---
 
-
----
 
